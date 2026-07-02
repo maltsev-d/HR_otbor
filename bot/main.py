@@ -29,8 +29,11 @@ app.register_blueprint(admin_bp)
 # FLASK RUN (в отдельном треде)
 # =========================
 def run_web():
-    print("[FLASK] STARTED")
-    app.run(host="0.0.0.0", port=10000, debug=False, use_reloader=False)
+    try:
+        print("[FLASK] STARTED")
+        app.run(host="0.0.0.0", port=10000, debug=False, use_reloader=False)
+    except Exception as e:
+        print(f"[FLASK] CRASH: {e}")
 
 # =========================
 # BOT + SCHEDULER
