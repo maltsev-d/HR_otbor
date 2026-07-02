@@ -30,7 +30,7 @@ env/
 *.egg-info/
 dist/
 build/
-
+chroma_data/
 # Tests
 .pytest_cache/
 .coverage

@@ -1,7 +1,6 @@
 import logging
 from config.llm import get_llm_client
-from openai import AsyncOpenAI
-from dotenv import load_dotenv
+
 
 logger = logging.getLogger(__name__)
 
