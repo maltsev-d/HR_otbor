@@ -1,6 +1,7 @@
 import asyncio
 import threading
 import os
+import time
 
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
@@ -58,5 +59,7 @@ async def main():
 # ENTRY POINT
 # =========================
 if __name__ == "__main__":
-    threading.Thread(target=run_web, daemon=True).start()
+    web_thread = threading.Thread(target=run_web, daemon=True)
+    web_thread.start()
+    time.sleep(2)  # даём Flask подняться до бота
     asyncio.run(main())
