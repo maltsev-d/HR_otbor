@@ -10,4 +10,4 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # Корень проекта (на уровень выше config/)
 _BASE_DIR  = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 
-os.makedirs(RESUME_DIR, exist_ok=True)
+#os.makedirs(RESUME_DIR, exist_ok=True)
