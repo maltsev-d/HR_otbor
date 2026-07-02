@@ -1,21 +1,19 @@
+print("[STARTUP] imports begin", flush=True)
 import asyncio
 import threading
 import os
 import time
-
 from aiogram import Bot, Dispatcher
 from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.default import DefaultBotProperties
-
 from flask import Flask
-
 from config.settings import BOT_TOKEN
 from bot.handlers import candidate, hr_actions, nudge
 from bot.handlers.nudge import run_scheduler
 from admin.app import admin_bp
 from bot.rag.index import rebuild_index
-
+print("[STARTUP] imports end", flush=True)
 
 
 # =========================
