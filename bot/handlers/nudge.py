@@ -1,12 +1,10 @@
 import asyncio
 import logging
 from datetime import datetime, timezone, timedelta
-
 from aiogram import Router, F, Bot
 from aiogram.types import Message, CallbackQuery
 from aiogram.fsm.context import FSMContext
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
 from db.session import SessionLocal
 from db.models import Candidate, Interview, Application
 from bot.states.application import ApplicationForm

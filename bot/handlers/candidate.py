@@ -12,7 +12,7 @@ import re
 import logging
 from aiogram.exceptions import TelegramNetworkError
 from bot.rag.index import search_vacancies
-from services.autoreject import check_autoreject
+from bot.services.autoreject import check_autoreject
 
 router = Router()
 
