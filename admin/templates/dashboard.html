@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% set active = "dashboard" %}
+{% block title %}Дашборд — HR Admin{% endblock %}
+{% block page_title %}Дашборд{% endblock %}
+{% block breadcrumb %}Дашборд{% endblock %}
+
+{% block content %}
+
+<div class="stats-grid">
+    <div class="stat-card sc-purple">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">{{ stats.total }}</div>
+        <div class="stat-label">Всего кандидатов</div>
+    </div>
+    <div class="stat-card sc-sky">
+        <div class="stat-icon">🆕</div>
+        <div class="stat-value">{{ stats.new }}</div>
+        <div class="stat-label">Новых откликов</div>
+    </div>
+    <div class="stat-card sc-teal">
+        <div class="stat-icon">📅</div>
+        <div class="stat-value">{{ stats.invited }}</div>
+        <div class="stat-label">Приглашены</div>
+    </div>
+    <div class="stat-card sc-green">
+        <div class="stat-icon">✅</div>
+        <div class="stat-value">{{ stats.confirmed }}</div>
+        <div class="stat-label">Подтвердили</div>
+        {% if stats.total > 0 %}
+        <div class="stat-trend">{{ ((stats.confirmed / stats.total) * 100)|int }}% конверсия</div>
+        {% endif %}
+    </div>
+    <div class="stat-card sc-amber">
+        <div class="stat-icon">📈</div>
+        <div class="stat-value">{{ stats.week_new }}</div>
+        <div class="stat-label">За 7 дней</div>
+    </div>
+</div>
+
+<!-- ВОРОНКА -->
+<div class="panel" style="margin-bottom: 16px;">
+    <div class="panel-header">
+        <div><div class="panel-title">Воронка подбора</div></div>
+    </div>
+    <div class="panel-body">
+        {% set total_nz = stats.total if stats.total > 0 else 1 %}
+        <div style="display:flex; gap:6px; height:52px;">
+            {% for label, count, bg, tc in [
+                ('Новые',       stats.new,       '#EEF2FF', '#4338CA'),
+                ('Приглашены',  stats.invited,   '#E0F2FE', '#0EA5E9'),
+                ('Подтвердили', stats.confirmed, '#ECFDF5', '#10B981'),
+            ] %}
+            <div style="flex:{{ [((count/total_nz)*100)|int, 4]|max }}; background:{{ bg }}; border-radius:8px; display:flex; flex-direction:column; align-items:center; justify-content:center; min-width:70px; padding:6px;">
+                <div style="font-size:18px; font-weight:800; color:{{ tc }}; line-height:1;">{{ count }}</div>
+                <div style="font-size:10px; font-weight:600; color:{{ tc }}; opacity:.7; margin-top:2px;">{{ label }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div class="dash-grid">
+    <!-- Вакансии -->
+    <div class="panel">
+        <div class="panel-header">
+            <div>
+                <div class="panel-title">Отклики по вакансиям</div>
+                <div class="panel-subtitle">{{ stats.vacancies_active }} активных</div>
+            </div>
+            <a href="/vacancies" class="btn btn-ghost btn-sm">Управление →</a>
+        </div>
+        <div class="panel-body">
+            {% if vac_stats %}
+                {% set max_cnt = vac_stats[0][1] if vac_stats[0][1] > 0 else 1 %}
+                {% for title, cnt in vac_stats %}
+                <div class="vac-bar-row">
+                    <div class="vac-bar-label" title="{{ title }}">{{ title }}</div>
+                    <div class="vac-bar-track"><div class="vac-bar-fill" style="width:{{ (cnt/max_cnt*100)|int }}%"></div></div>
+                    <div class="vac-bar-count">{{ cnt }}</div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div style="text-align:center; padding:30px 0; color:var(--dim);">
+                    <div style="font-size:28px; margin-bottom:8px;">📋</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--muted);">Вакансий пока нет</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Последние кандидаты -->
+    <div class="panel">
+        <div class="panel-header">
+            <div>
+                <div class="panel-title">Последние кандидаты</div>
+                <div class="panel-subtitle">Свежие отклики</div>
+            </div>
+            <a href="/candidates" class="btn btn-ghost btn-sm">Все →</a>
+        </div>
+        <div class="panel-body">
+            {% if recent %}
+                {% for c in recent %}
+                {% set fl = (c.full_name or '?')[0].lower() %}
+                <a href="/candidates/{{ c.id }}" class="recent-item">
+                    <div class="avatar avatar-sm av-{{ fl }}">{{ (c.full_name or '?')[0].upper() }}</div>
+                    <div class="recent-info">
+                        <div class="recent-name">{{ c.full_name or 'Без имени' }}</div>
+                        <div class="recent-meta">
+                            {{ c.vacancy or '—' }}{% if c.salary %} · {{ c.salary|int }}{% endif %}
+                        </div>
+                    </div>
+                    <div class="recent-right">
+                        <span class="badge badge-{{ c.status }}" style="font-size:12px; padding:5px 14px;">{{ c.status|status_ru }}</span>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div style="text-align:center; padding:30px 0; color:var(--dim);">
+                    <div style="font-size:28px; margin-bottom:8px;">👤</div>
+                    <div style="font-size:13px; font-weight:600; color:var(--muted);">Кандидатов пока нет</div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

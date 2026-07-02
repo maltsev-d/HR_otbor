@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+{% set active = "candidates" %}
+{% block title %}{{ c.full_name or 'Кандидат' }} — HR Admin{% endblock %}
+{% block page_title %}Кандидат{% endblock %}
+{% block breadcrumb %}{{ c.full_name or '—' }}{% endblock %}
+
+{% block topbar_right %}
+<a href="/candidates" class="btn btn-ghost btn-sm">← Назад</a>
+{% endblock %}
+
+{% block content %}
+{% set fl = (c.full_name or '?')[0].lower() %}
+
+<!-- ШАПКА -->
+<div class="panel" style="margin-bottom:16px;">
+    <div class="panel-body">
+        <div class="flex items-center gap-16" style="flex-wrap:wrap;">
+            <div class="avatar avatar-lg av-{{ fl }}">{{ (c.full_name or '?')[0].upper() }}</div>
+            <div style="flex:1;">
+                <div style="font-size:20px; font-weight:800; color:var(--text); letter-spacing:-.5px;">{{ c.full_name or 'Без имени' }}</div>
+                <div style="font-size:13px; color:var(--muted); margin-top:3px; display:flex; gap:12px; flex-wrap:wrap;">
+                    {% if c.contact %}<span>📱 {{ c.contact }}</span>{% endif %}
+                    {% if c.location %}<span>📍 {{ c.location }}</span>{% endif %}
+                    {% if c.vacancy_title %}<span>💼 {{ c.vacancy_title }}</span>{% endif %}
+                </div>
+            </div>
+            <div class="flex items-center gap-8">
+                <span class="badge badge-{{ c.status }}" style="font-size:12px; padding:5px 14px;">{{ c.status|status_ru }}</span>
+                <div style="font-size:11.5px; color:var(--dim);">ID {{ c.id }} · {{ c.created_at.strftime('%d.%m.%Y') if c.created_at else '—' }}</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ГРИД -->
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px;">
+
+    <!-- Анкета -->
+    <div class="panel">
+        <div class="panel-header"><div class="panel-title">📝 Анкета</div></div>
+        <div class="panel-body" style="padding:0;">
+            <div class="info-grid">
+                <div class="info-cell"><div class="info-label">Возраст</div><div class="info-value">{{ c.age or '—' }}</div></div>
+                <div class="info-cell"><div class="info-label">Английский</div><div class="info-value">{{ c.english_level or '—' }}</div></div>
+                <div class="info-cell"><div class="info-label">ЗП</div><div class="info-value">{{ c.salary_expectation|int if c.salary_expectation else '—' }}</div></div>
+                <div class="info-cell"><div class="info-label">Старт</div><div class="info-value">{{ c.start_date or '—' }}</div></div>
+                <div class="info-cell"><div class="info-label">Контракт</div><div class="info-value">{{ c.contract_type or '—' }}</div></div>
+                <div class="info-cell">
+                    <div class="info-label">Согласие</div>
+                    <div class="info-value">{% if c.consent %}<span style="color:var(--green);">✓ Дано</span>{% else %}<span style="color:var(--rose);">✗ Нет</span>{% endif %}</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Правая колонка -->
+    <div style="display:flex; flex-direction:column; gap:12px;">
+
+        <!-- Вакансия -->
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">💼 Вакансия</div></div>
+            <div class="panel-body-sm">
+                {% if c.vacancy_title %}
+                    <div style="font-size:15px; font-weight:700;">{{ c.vacancy_title }}</div>
+                    <div style="font-size:12px; color:var(--muted); margin-top:4px;">Отклик: {{ c.app_created_at.strftime('%d.%m.%Y') if c.app_created_at else '—' }}</div>
+                {% else %}
+                    <span class="td-dim">Не привязана</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Интервью -->
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">📅 Интервью</div></div>
+            <div class="panel-body-sm">
+                {% if c.interview_at %}
+                <div style="display:flex; align-items:center; gap:12px;">
+                    <div style="background:#EEF2FF; border-radius:10px; padding:8px 14px; text-align:center; flex-shrink:0;">
+                        <div style="font-size:20px; font-weight:800; color:var(--indigo); line-height:1;">{{ c.interview_at.strftime('%d') }}</div>
+                        <div style="font-size:10px; color:var(--indigo); opacity:.7; font-weight:600; text-transform:uppercase;">{{ c.interview_at.strftime('%b') }}</div>
+                    </div>
+                    <div>
+                        <div style="font-weight:600;">{{ c.interview_at.strftime('%H:%M') }}</div>
+                        <div style="font-size:12px; color:var(--muted);">
+                            {% if c.interview_confirmed %}<span style="color:var(--green);">✓ Подтверждено</span>
+                            {% elif c.interview_declined %}<span style="color:var(--rose);">✗ Отказался</span>
+                            {% else %}<span style="color:var(--amber);">⏳ Ожидает ответа</span>{% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% else %}
+                    <span class="td-dim">Не назначено</span>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Резюме -->
+        <div class="panel">
+            <div class="panel-header"><div class="panel-title">📎 Резюме</div></div>
+            <div class="panel-body-sm">
+                {% if c.resume_url %}
+                    <a href="{{ c.resume_url }}" target="_blank" class="btn btn-ghost btn-sm">🔗 Открыть ссылку</a>
+                {% elif c.resume_file_id %}
+                    <div class="flex items-center gap-10">
+                        <a href="/resume/{{ c.id }}" class="btn btn-primary btn-sm">⬇️ Скачать</a>
+                        <form action="/candidates/{{ c.id }}/request-resume" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-ghost btn-sm">📤 Переслать мне</button>
+                        </form>
+                    </div>
+                {% else %}
+                    <span class="td-dim">Не загружено</span>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- AI SUMMARY -->
+{% if c.ai_summary %}
+<div class="ai-summary" style="margin-bottom:16px;">
+    <div class="ai-summary-header"><span>✨</span> AI Summary</div>
+    <div class="ai-summary-text">{{ c.ai_summary }}</div>
+</div>
+{% endif %}
+
+<!-- ДЕЙСТВИЯ -->
+<div class="panel" style="margin-bottom:16px;">
+    <div class="panel-header"><div class="panel-title">⚡ Действия</div></div>
+    <div class="panel-body">
+        <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+            <div>
+                <div class="form-label">Назначить интервью</div>
+                <form action="/schedule/{{ c.id }}" method="POST" class="flex gap-8">
+                    <input type="datetime-local" name="interview_time" required class="form-control" style="flex:1; font-size:12.5px;">
+                    <button type="submit" class="btn btn-primary btn-sm" style="flex-shrink:0;">📅</button>
+                </form>
+            </div>
+            <div>
+                <div class="form-label">Отклонить</div>
+                <form action="/reject/{{ c.id }}" method="POST" onsubmit="return confirm('Отказать {{ c.full_name }}?')">
+                    <button type="submit" class="btn btn-red btn-sm" style="width:100%;">✕ Отказать</button>
+                </form>
+            </div>
+            <div>
+                <div class="form-label">Написать вопрос</div>
+                <button class="btn btn-ghost btn-sm" onclick="toggleModal('modal-clarify')" style="width:100%;">❓ Уточнить</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ПЕРЕПИСКА -->
+{% if c.hr_messages %}
+<div class="panel">
+    <div class="panel-header">
+        <div>
+            <div class="panel-title">💬 Переписка HR ↔ Кандидат</div>
+            <div class="panel-subtitle">{{ c.hr_messages|length }} сообщений</div>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div class="timeline">
+            {% for msg in c.hr_messages %}
+            <div class="timeline-item">
+                <div class="timeline-dot">HR</div>
+                <div class="timeline-content">
+                    <div class="timeline-date">{{ msg.created_at.strftime('%d.%m.%Y %H:%M') if msg.created_at else '' }}</div>
+                    <div class="timeline-q">{{ msg.question }}</div>
+                    {% if msg.answer %}
+                        <div class="timeline-a">{{ msg.answer }}</div>
+                    {% else %}
+                        <div class="timeline-a pending">⏳ Ответ ещё не получен</div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-clarify">
+    <div class="modal">
+        <div class="modal-title">❓ Запрос кандидату</div>
+        <form action="/clarify/{{ c.id }}" method="POST">
+            <div class="form-group">
+                <label class="form-label">Сообщение</label>
+                <textarea name="hr_message" class="form-control" placeholder="Задайте вопрос кандидату..." required></textarea>
+            </div>
+            <div class="flex gap-8">
+                <button type="submit" class="btn btn-primary" style="flex:1;">Отправить</button>
+                <button type="button" class="btn btn-ghost" onclick="toggleModal('modal-clarify')">Отмена</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function toggleModal(id) { document.getElementById(id).classList.toggle('open'); }
+document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open')); });
+</script>
+{% endblock %}

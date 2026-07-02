@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% set active = "candidates" %}
+{% block title %}Кандидаты — HR Admin{% endblock %}
+{% block page_title %}Кандидаты{% endblock %}
+{% block breadcrumb %}Список{% endblock %}
+
+{% block topbar_right %}
+<span style="font-size:12px; color:var(--muted);">{{ candidates|length }} человек</span>
+{% endblock %}
+
+{% block content %}
+
+<!-- Фильтры -->
+<div class="panel" style="margin-bottom:14px;">
+    <div class="panel-body-sm">
+        <div class="flex items-center gap-8" style="flex-wrap:wrap;">
+            <span style="font-size:12px; font-weight:600; color:var(--muted); text-transform:uppercase; letter-spacing:.5px;">Статус:</span>
+            <a href="/candidates" class="btn btn-sm {% if not request.args.get('status') %}btn-primary{% else %}btn-ghost{% endif %}">Все</a>
+            <a href="/candidates?status=new"       class="btn btn-sm {% if request.args.get('status')=='new' %}btn-primary{% else %}btn-ghost{% endif %}">Новые</a>
+            <a href="/candidates?status=invited"   class="btn btn-sm {% if request.args.get('status')=='invited' %}btn-primary{% else %}btn-ghost{% endif %}">Приглашены</a>
+            <a href="/candidates?status=confirmed" class="btn btn-sm {% if request.args.get('status')=='confirmed' %}btn-primary{% else %}btn-ghost{% endif %}">Подтвердили</a>
+            <a href="/candidates?status=declined"  class="btn btn-sm {% if request.args.get('status')=='declined' %}btn-primary{% else %}btn-ghost{% endif %}">Отказались</a>
+            <a href="/candidates?status=rejected"  class="btn btn-sm {% if request.args.get('status')=='rejected' %}btn-primary{% else %}btn-ghost{% endif %}">Отклонены</a>
+        </div>
+    </div>
+</div>
+
+<div class="table-wrap">
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Кандидат</th>
+                <th>Вакансия</th>
+                <th>Город / ЗП</th>
+                <th>Статус</th>
+                <th>Интервью</th>
+                <!--
+                <th>Резюме</th>
+                <th>AI Summary</th>
+                -->
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for c in candidates %}
+            {% set fl = (c.full_name or '?')[0].lower() %}
+            <tr>
+                <td class="td-dim" style="font-size:12px;">{{ c.id }}</td>
+
+                <td>
+                    <div class="flex items-center gap-8">
+                        <div class="avatar avatar-sm av-{{ fl }}">{{ (c.full_name or '?')[0].upper() }}</div>
+                        <div>
+                            <div style="font-weight:600;">{{ c.full_name or '—' }}</div>
+                            {% if c.age %}<div style="font-size:11px; color:var(--dim);">{{ c.age }} лет</div>{% endif %}
+                        </div>
+                    </div>
+                </td>
+
+                <td class="td-muted">{{ c.vacancy_title or '—' }}</td>
+
+                <td class="td-muted" style="font-size:12.5px;">
+                    {{ c.location or '—' }}
+                    {% if c.salary_expectation %}
+                    <div style="font-weight:600; color:var(--text-2); font-size:12px;">{{ c.salary_expectation|int }}</div>
+                    {% endif %}
+                </td>
+
+                <td><span class="badge badge-{{ c.status }}">{{ c.status|status_ru }}</span></td>
+
+                <td class="td-muted" style="font-size:12px; white-space:nowrap;">
+                    {% if c.interview_at %}
+                        <div style="font-weight:500; color:var(--text-2);">{{ c.interview_at.strftime('%d.%m.%Y') }}</div>
+                        <div style="font-size:11px; color:var(--dim);">{{ c.interview_at.strftime('%H:%M') }}</div>
+                    {% else %}<span class="td-dim">—</span>{% endif %}
+                </td>
+                <!--
+                <td>
+                    {% if c.resume_url %}
+                        <a href="{{ c.resume_url }}" target="_blank" class="btn btn-ghost btn-sm">🔗 Ссылка</a>
+                    {% elif c.resume_file_id %}
+                        <form action="/candidates/{{ c.id }}/request-resume" method="POST">
+                            <button type="submit" class="btn btn-ghost btn-sm">📤 Переслать</button>
+                        </form>
+                    {% else %}
+                        <span class="td-dim">—</span>
+                    {% endif %}
+                </td>
+
+                <td style="max-width:200px;">
+                    {% if c.ai_summary %}
+                        <div style="font-size:11.5px; color:var(--muted); overflow:hidden; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;">
+                            {{ c.ai_summary }}
+                        </div>
+                    {% else %}
+                        <span class="td-dim" style="font-size:11.5px;">—</span>
+                    {% endif %}
+                </td>
+                -->
+                <td><a href="/candidates/{{ c.id }}" class="btn btn-ghost btn-sm">Открыть →</a></td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="9" style="text-align:center; padding:60px; color:var(--dim);">
+                    <div style="font-size:32px; margin-bottom:10px;">👤</div>
+                    <div style="font-size:14px; font-weight:600; color:var(--muted);">Кандидатов пока нет</div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
