@@ -8,3 +8,4 @@ jinja2
 requests==2.32.3
 APScheduler
 openai
+chromadb
