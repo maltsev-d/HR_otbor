@@ -19,8 +19,12 @@ from flask import Flask
 print("[STARTUP] flask ok", flush=True)
 from config.settings import BOT_TOKEN
 print("[STARTUP] config.settings ok", flush=True)
-from bot.handlers import candidate, hr_actions, nudge
-print("[STARTUP] bot.handlers ok", flush=True)
+from bot.handlers import candidate
+print("[STARTUP] candidate ok", flush=True)
+from bot.handlers import hr_actions
+print("[STARTUP] hr_actions ok", flush=True)
+from bot.handlers import nudge
+print("[STARTUP] nudge ok", flush=True)
 from bot.handlers.nudge import run_scheduler
 print("[STARTUP] bot.handlers.nudge ok", flush=True)
 from admin.app import admin_bp
