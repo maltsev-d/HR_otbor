@@ -1,7 +1,13 @@
+print("[INDEX] import started", flush=True)
 import chromadb
+print("[INDEX] chromadb ok", flush=True)
 from sentence_transformers import SentenceTransformer
+print("[INDEX] sentence_transformers ok", flush=True)
 from db.models import Vacancy
+print("[INDEX] db.models ok", flush=True)
 from db.session import SessionLocal
+print("[INDEX] db.session ok", flush=True)
+print("[INDEX] import ended", flush=True)
 
 # Инициализация
 chroma_client = chromadb.PersistentClient(path="./chroma_data")
