@@ -7,19 +7,20 @@ from aiogram.enums import ParseMode
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.client.default import DefaultBotProperties
 from flask import Flask
-from config.settings import BOT_TOKEN
 from bot.handlers import candidate
 print("[STARTUP] candidate ok", flush=True)
 from bot.handlers import hr_actions
-#print("[STARTUP] hr_actions ok", flush=True)
+print("[STARTUP] hr_actions ok", flush=True)
 from bot.handlers import nudge
-#print("[STARTUP] nudge ok", flush=True)
+print("[STARTUP] nudge ok", flush=True)
 from bot.handlers.nudge import run_scheduler
-#print("[STARTUP] bot.handlers.nudge ok", flush=True)
+print("[STARTUP] bot.handlers.nudge ok", flush=True)
 from admin.app import admin_bp
-#print("[STARTUP] admin.app ok", flush=True)
+print("[STARTUP] admin.app ok", flush=True)
 from bot.rag.index import rebuild_index
-#print("[STARTUP] bot.rag.index ok", flush=True)
+print("[STARTUP] bot.rag.index ok", flush=True)
+from config.settings import BOT_TOKEN
+print("[STARTUP] config.settings ok", flush=True)
 print("[STARTUP] imports end", flush=True)
 
 
