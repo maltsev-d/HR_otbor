@@ -1,36 +1,25 @@
-print("[STARTUP] imports begin", flush=True)
 import asyncio
-print("[STARTUP] asyncio ok", flush=True)
 import threading
-print("[STARTUP] threading ok", flush=True)
 import os
-print("[STARTUP] os ok", flush=True)
 import time
-print("[STARTUP] time ok", flush=True)
 from aiogram import Bot, Dispatcher
-print("[STARTUP] aiogram ok", flush=True)
 from aiogram.enums import ParseMode
-print("[STARTUP] aiogram.enums ok", flush=True)
 from aiogram.fsm.storage.memory import MemoryStorage
-print("[STARTUP] aiogram.fsm.storage.memory ok", flush=True)
 from aiogram.client.default import DefaultBotProperties
-print("[STARTUP] aiogram.client.default ok", flush=True)
 from flask import Flask
-print("[STARTUP] flask ok", flush=True)
 from config.settings import BOT_TOKEN
-print("[STARTUP] config.settings ok", flush=True)
 from bot.handlers import candidate
 print("[STARTUP] candidate ok", flush=True)
 from bot.handlers import hr_actions
-print("[STARTUP] hr_actions ok", flush=True)
+#print("[STARTUP] hr_actions ok", flush=True)
 from bot.handlers import nudge
-print("[STARTUP] nudge ok", flush=True)
+#print("[STARTUP] nudge ok", flush=True)
 from bot.handlers.nudge import run_scheduler
-print("[STARTUP] bot.handlers.nudge ok", flush=True)
+#print("[STARTUP] bot.handlers.nudge ok", flush=True)
 from admin.app import admin_bp
-print("[STARTUP] admin.app ok", flush=True)
+#print("[STARTUP] admin.app ok", flush=True)
 from bot.rag.index import rebuild_index
-print("[STARTUP] bot.rag.index ok", flush=True)
+#print("[STARTUP] bot.rag.index ok", flush=True)
 print("[STARTUP] imports end", flush=True)
 
 

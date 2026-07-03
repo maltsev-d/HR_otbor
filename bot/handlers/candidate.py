@@ -1,18 +1,26 @@
 from aiogram import Router, F
+print("[STARTUP] aiogram Router ok", flush=True)
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import CommandStart
+print("[STARTUP] aiogram types ok", flush=True)
 from bot.states.application import ApplicationForm
+print("[STARTUP] states ok", flush=True)
 from bot.services.llm_service import generate_candidate_summary
+print("[STARTUP] llm_service ok", flush=True)
 from config.questions import q
 from config.settings import ADMIN_IDS
+print("[STARTUP] config ok", flush=True)
 from db.models import Candidate, Vacancy, Application
 from db.session import SessionLocal
+print("[STARTUP] db ok", flush=True)
 import re
 import logging
 from aiogram.exceptions import TelegramNetworkError
 from bot.rag.index import search_vacancies
+print("[STARTUP] rag ok", flush=True)
 from bot.services.autoreject import check_autoreject
+print("[STARTUP] autoreject ok", flush=True)
 
 router = Router()
 
