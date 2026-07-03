@@ -9,4 +9,5 @@ requests==2.32.3
 APScheduler
 openai
 chromadb
-sentence_transformers
+#sentence_transformers
+cohere

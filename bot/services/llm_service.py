@@ -41,4 +41,5 @@ async def generate_candidate_summary(candidate_data: dict, vacancy_title: str = 
         return response.choices[0].message.content.strip()
     except Exception as e:
         logger.error(f"LLM summary error: {e}")
+        print(f"[LLM ERROR] {e}", flush=True)
         return None

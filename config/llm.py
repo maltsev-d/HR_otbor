@@ -8,8 +8,8 @@ from openai import AsyncOpenAI
 # Groq (прод):        LLM_PROVIDER=groq    LLM_MODEL=llama-3.1-70b-versatile
 # =====================================================================
 
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "ollama")
-LLM_MODEL = os.getenv("LLM_MODEL", "qwen2.5-coder:7b")
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")
+LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
 
 
 def get_llm_client() -> tuple[AsyncOpenAI, str]:

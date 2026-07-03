@@ -1,25 +1,27 @@
-print("[INDEX] import started", flush=True)
+import os
 import chromadb
-print("[INDEX] chromadb ok", flush=True)
-from sentence_transformers import SentenceTransformer
-print("[INDEX] sentence_transformers ok", flush=True)
+import cohere
 from db.models import Vacancy
-print("[INDEX] db.models ok", flush=True)
 from db.session import SessionLocal
-print("[INDEX] db.session ok", flush=True)
-print("[INDEX] import ended", flush=True)
 
-# Инициализация
 chroma_client = chromadb.PersistentClient(path="./chroma_data")
 collection = chroma_client.get_or_create_collection(
     name="jobs",
     metadata={"hnsw:space": "cosine"}
 )
-embedder = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+co = cohere.Client(os.getenv("COHERE_API_KEY"))
+
+
+def _embed(texts: list[str]) -> list[list[float]]:
+    response = co.embed(
+        texts=texts,
+        model="embed-multilingual-v3.0",
+        input_type="search_document",
+    )
+    return response.embeddings
 
 
 def rebuild_index():
-    """Загружает все активные вакансии из Postgres в ChromaDB"""
     with SessionLocal() as session:
         vacancies = session.query(Vacancy).filter_by(is_active=True).all()
         vac_list = [(v.id, v.title, v.description) for v in vacancies]
@@ -28,13 +30,18 @@ def rebuild_index():
     if existing["ids"]:
         collection.delete(ids=existing["ids"])
 
-    for vid, title, description in vac_list:
-        text = f"{title}\n{description}"
-        embedding = embedder.encode(text).tolist()
+    if not vac_list:
+        print("RAG: вакансий нет, индекс пуст")
+        return
+
+    texts = [f"{title}\n{desc or ''}" for _, title, desc in vac_list]
+    embeddings = _embed(texts)
+
+    for i, (vid, title, _) in enumerate(vac_list):
         collection.add(
             ids=[str(vid)],
-            embeddings=[embedding],
-            documents=[text],
+            embeddings=[embeddings[i]],
+            documents=[texts[i]],
             metadatas=[{"title": title}]
         )
 
@@ -42,8 +49,8 @@ def rebuild_index():
 
 
 def upsert_vacancy(vacancy: Vacancy):
-    text = f"{vacancy.title}\n{vacancy.description}"
-    embedding = embedder.encode(text).tolist()
+    text = f"{vacancy.title}\n{vacancy.description or ''}"
+    embedding = _embed([text])[0]
     collection.upsert(
         ids=[str(vacancy.id)],
         embeddings=[embedding],
@@ -57,7 +64,12 @@ def delete_vacancy(vacancy_id: int):
 
 
 def search_vacancies(query: str, n_results: int = 5) -> list[dict]:
-    query_embedding = embedder.encode(query).tolist()
+    response = co.embed(
+        texts=[query],
+        model="embed-multilingual-v3.0",
+        input_type="search_query",
+    )
+    query_embedding = response.embeddings[0]
 
     results = collection.query(
         query_embeddings=[query_embedding],

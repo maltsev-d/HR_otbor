@@ -1,4 +1,3 @@
-print("[CANDIDATE] import started", flush=True)
 from aiogram import Router, F
 from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.fsm.context import FSMContext
@@ -10,15 +9,10 @@ from config.settings import ADMIN_IDS
 from db.models import Candidate, Vacancy, Application
 from db.session import SessionLocal
 import re
-print("[CANDIDATE] re ok", flush=True)
 import logging
-print("[CANDIDATE] logging ok", flush=True)
 from aiogram.exceptions import TelegramNetworkError
-print("[CANDIDATE] aiogram.exceptions ok", flush=True)
 from bot.rag.index import search_vacancies
-print("[CANDIDATE] rag ok", flush=True)
 from bot.services.autoreject import check_autoreject
-print("[CANDIDATE] autoreject ok", flush=True)
 
 router = Router()
 
