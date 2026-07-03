@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Вход — HR Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            min-height: 100vh;
+            background: #EEF0FA;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .card {
+            background: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 24px rgba(26,28,58,0.10);
+            padding: 40px 36px;
+            width: 100%;
+            max-width: 380px;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 28px;
+        }
+        .logo-gem {
+            width: 40px; height: 40px;
+            background: linear-gradient(135deg, #4338CA, #6D28D9);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px;
+        }
+        .logo-text { font-size: 18px; font-weight: 800; color: #1A1C3A; }
+        .logo-sub  { font-size: 11px; color: #7880A8; font-weight: 500; }
+        h1 { font-size: 20px; font-weight: 800; color: #1A1C3A; margin-bottom: 6px; }
+        .sub { font-size: 13px; color: #7880A8; margin-bottom: 24px; }
+        .form-label {
+            display: block;
+            font-size: 11px; font-weight: 700;
+            text-transform: uppercase; letter-spacing: .5px;
+            color: #7880A8; margin-bottom: 5px;
+        }
+        .form-control {
+            width: 100%; background: #F5F6FD;
+            border: 1.5px solid #E2E5F0; border-radius: 8px;
+            color: #1A1C3A; font-family: inherit;
+            font-size: 14px; padding: 10px 13px;
+            outline: none; transition: border-color .15s, box-shadow .15s;
+            margin-bottom: 14px;
+        }
+        .form-control:focus {
+            border-color: #4338CA;
+            box-shadow: 0 0 0 3px rgba(67,56,202,.10);
+            background: #fff;
+        }
+        .btn {
+            width: 100%; padding: 11px;
+            background: linear-gradient(135deg, #4338CA, #6D28D9);
+            color: #fff; border: none; border-radius: 8px;
+            font-family: inherit; font-size: 14px; font-weight: 700;
+            cursor: pointer; transition: opacity .18s;
+            margin-top: 4px;
+        }
+        .btn:hover { opacity: .88; }
+        .error {
+            background: #FFF1F2; border: 1px solid #FECDD3;
+            color: #E11D48; border-radius: 8px;
+            padding: 10px 14px; font-size: 13px; font-weight: 600;
+            margin-bottom: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <div class="logo">
+        <div class="logo-gem">⚡</div>
+        <div>
+            <div class="logo-text">HR Admin</div>
+            <div class="logo-sub">RECRUITMENT</div>
+        </div>
+    </div>
+    <h1>Вход в панель</h1>
+    <div class="sub">Введите логин и пароль для доступа</div>
+
+    {% if error %}
+    <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+        <label class="form-label">Логин</label>
+        <input type="text" name="login" class="form-control" placeholder="admin" autofocus required>
+        <label class="form-label">Пароль</label>
+        <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+        <button type="submit" class="btn">Войти →</button>
+    </form>
+</div>
+</body>
+</html>

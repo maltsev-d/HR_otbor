@@ -1,5 +1,6 @@
 import sys
 import os
+from flask import session, request, redirect, url_for
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
@@ -15,6 +16,33 @@ import requests
 from flask import Response, abort
 
 admin_bp = Blueprint("admin", __name__, template_folder="templates")
+
+ADMIN_LOGIN    = os.getenv("ADMIN_LOGIN", "admin")
+ADMIN_PASSWORD = os.getenv("ADMIN_PASSWORD", "changeme")
+
+@admin_bp.before_request
+def require_login():
+    if request.endpoint == "admin.login_page":
+        return  # логин-страницу пускаем без проверки
+    if not session.get("logged_in"):
+        return redirect(url_for("admin.login_page"))
+
+@admin_bp.route("/login", methods=["GET", "POST"])
+def login_page():
+    error = None
+    if request.method == "POST":
+        login = request.form.get("login", "").strip()
+        password = request.form.get("password", "").strip()
+        if login == ADMIN_LOGIN and password == ADMIN_PASSWORD:
+            session["logged_in"] = True
+            return redirect(url_for("admin.dashboard"))
+        error = "Неверный логин или пароль"
+    return render_template("login.html", error=error)
+
+@admin_bp.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for("admin.login_page"))
 
 STATUS_LABELS = {
     "draft":     "Черновик",
