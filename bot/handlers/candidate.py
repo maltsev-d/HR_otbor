@@ -366,7 +366,7 @@ async def handle_contract_type(message: Message, state: FSMContext):
         await state.clear()
         return
 
-    await safe_send(message.bot, message.chat.id, "✅ Анкета отправлена! Ожидайте обратной связи.")
+    await safe_send(message.bot, message.chat.id, "✅ Спасибо за ответы. Анкета отправлена! Ожидайте обратной связи в ближайшее время.")
 
     app_id = data.get("app_id")
 
