@@ -174,7 +174,7 @@ async def handle_full_name(message: Message, state: FSMContext):
     if not full_name:
         return await safe_send(message.bot, message.chat.id, "Введите ФИО текстом.")
 
-    first_name = full_name.split()[0]
+    first_name = full_name.split()[1]
     await state.update_data(full_name=full_name)
     data = await state.get_data()
     save_partial_candidate(message.from_user.id, data)
@@ -366,7 +366,7 @@ async def handle_contract_type(message: Message, state: FSMContext):
         await state.clear()
         return
 
-    await safe_send(message.bot, message.chat.id, "✅ Спасибо за ответы. Анкета отправлена! Ожидайте обратной связи в ближайшее время.")
+    await safe_send(message.bot, message.chat.id, "✅ Спасибо за ответы!\nАнкета отправлена. Ожидайте обратной связи в ближайшее время.")
 
     app_id = data.get("app_id")
 

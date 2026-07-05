@@ -22,6 +22,7 @@ SUMMARY_PROMPT = """Кандидат на вакансию {vacancy}.
 - без заголовков
 - 3–5 предложений
 - без канцелярита и воды
+- не выдумывай про опыт работы, о нём вопросов не было
 - писать по делу, как внутренний HR-комментарий
 - возраст - это не опыт работы по вакансии на которую отклинулся, а просто возраст человека.
 """
@@ -54,7 +55,7 @@ async def generate_candidate_summary(candidate_data: dict, vacancy_title: str = 
         response = await client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=150,
+            max_tokens=175,
             temperature=0.3,
         )
         return response.choices[0].message.content.strip()

@@ -239,7 +239,7 @@ async def handle_reject(callback: CallbackQuery):
     try:
         await callback.message.bot.send_message(
             tg_id,
-            "😔 Спасибо за отклик, но по данной позиции мы не можем продолжить с вами процесс."
+            "😔 Спасибо за отклик! К сожалению, по данной позиции мы не можем продолжить с вами процесс."
         )
     except Exception:
         logging.exception(f"Не удалось отправить отказ tg_id={tg_id}")
