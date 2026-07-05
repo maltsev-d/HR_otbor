@@ -7,7 +7,22 @@ logger = logging.getLogger(__name__)
 SUMMARY_PROMPT = """Кандидат на вакансию {vacancy}.
 {candidate_data}
 
-Дай краткое саммари: впечатление, 1-2 плюса, 1 вопрос для интервью. Без заголовков, 3-4 предложения."""
+Ты — опытный HR-специалист, который делает первичную оценку кандидата по анкете.
+
+Твоя задача — дать короткое, но содержательное резюме кандидата для рекрутера.
+
+Формат ответа:
+- общее впечатление (1–2 предложения)
+- 1–2 сильные стороны кандидата
+- 1 потенциальный риск или неопределённость (если есть, иначе — "рисков не видно на этом этапе")
+- 1-2 вопроса, которые стоит задать перед интервью
+
+Ограничения:
+- без заголовков
+- 3–5 предложений
+- без канцелярита и воды
+- писать по делу, как внутренний HR-комментарий
+"""
 
 
 async def generate_candidate_summary(candidate_data: dict, vacancy_title: str = "") -> str | None:
@@ -17,6 +32,8 @@ async def generate_candidate_summary(candidate_data: dict, vacancy_title: str = 
     lines = []
     if candidate_data.get("location"):
         lines.append(f"Город: {candidate_data['location']}")
+    if candidate_data.get("age"):
+        lines.append(f"Возраст: {candidate_data['age']}")
     if candidate_data.get("english_level"):
         lines.append(f"Английский: {candidate_data['english_level']}")
     if candidate_data.get("salary_expectation"):
