@@ -79,7 +79,7 @@ def search_vacancies(query: str, n_results: int = 5) -> list[dict]:
     vacancies = []
     for i, job_id in enumerate(results["ids"][0]):
         score = 1 - results["distances"][0][i]
-        if score >= 0.4:
+        if score >= 0.5:
             vacancies.append({
                 "vacancy_id": int(job_id),
                 "title": results["metadatas"][0][i]["title"],
