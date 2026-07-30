@@ -172,7 +172,7 @@ async def handle_vacancy(callback: CallbackQuery, state: FSMContext):
 async def handle_full_name(message: Message, state: FSMContext):
     full_name = (message.text or "").strip()
     if not full_name:
-        return await safe_send(message.bot, message.chat.id, "Введите ФИО текстом.")
+        return await safe_send(message.bot, message.chat.id, "Введите полное ФИО.")
 
     first_name = full_name.split()[1]
     await state.update_data(full_name=full_name)
@@ -210,7 +210,7 @@ async def handle_consent_yes(callback: CallbackQuery, state: FSMContext):
 async def handle_consent_no(callback: CallbackQuery, state: FSMContext):
     await state.clear()
     await callback.message.answer(
-        "😔 Без согласия на обработку персональных данных мы не можем принять вашу анкету.\n\n"
+        "😔 К сожалению, без согласия на обработку персональных данных мы не можем принять вашу анкету.\n\n"
         "Если передумаете — нажмите /start и попробуйте снова."
     )
     await callback.answer()
@@ -227,7 +227,7 @@ async def handle_resume(message: Message, state: FSMContext):
         await state.update_data(resume_file_id=None, resume_url=message.text.strip())
     else:
         return await safe_send(message.bot, message.chat.id,
-                                "Отправьте файл резюме или ссылку (начинается с http).")
+                                "Отправьте файл резюме или ссылку.")
 
     data = await state.get_data()
     update_application(data["app_id"], data)
