@@ -64,6 +64,11 @@ def delete_vacancy(vacancy_id: int):
 
 
 def search_vacancies(query: str, n_results: int = 5) -> list[dict]:
+    count = collection.count()#################################
+    if count == 0:
+        return []
+    n_results = min(n_results, count)#############################
+
     response = co.embed(
         texts=[query],
         model="embed-multilingual-v3.0",
