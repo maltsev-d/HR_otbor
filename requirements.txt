@@ -9,5 +9,7 @@ requests==2.32.3
 APScheduler
 openai
 chromadb
+pdfplumber
+python-docx
 #sentence_transformers
 cohere

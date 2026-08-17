@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 {% set active = "autorules" %}
 
-{% block title %}Автоправила — HR Admin{% endblock %}
-{% block page_title %}Автоправила{% endblock %}
-{% block breadcrumb %}Отсев{% endblock %}
+{% block title %}Auto-reject Rules — HR Admin{% endblock %}
+{% block page_title %}Auto-reject Rules{% endblock %}
+{% block breadcrumb %}Screening{% endblock %}
 
 {% block topbar_right %}
-<button class="btn btn-primary" onclick="toggleModal('modal-add')">+ Добавить правило</button>
+<button class="btn btn-primary" onclick="toggleModal('modal-add')">+ Add rule</button>
 {% endblock %}
 
 {% block content %}
@@ -16,11 +16,11 @@
         <thead>
             <tr>
                 <th>#</th>
-                <th>Поле</th>
-                <th>Условие</th>
-                <th>Значение</th>
-                <th>Статус</th>
-                <th>Действия</th>
+                <th>Field</th>
+                <th>Condition</th>
+                <th>Value</th>
+                <th>Status</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -32,21 +32,21 @@
                 <td style="font-weight:700; color:var(--text-2);">{{ r.value }}</td>
                 <td>
                     {% if r.is_active %}
-                        <span class="badge badge-active">Активно</span>
+                        <span class="badge badge-active">Active</span>
                     {% else %}
-                        <span class="badge badge-inactive">Выкл</span>
+                        <span class="badge badge-inactive">Off</span>
                     {% endif %}
                 </td>
                 <td>
                     <div class="flex gap-8">
                         <form action="/autorules/toggle/{{ r.id }}" method="POST">
                             <button type="submit" class="btn btn-ghost btn-sm">
-                                {{ '⏸ Выкл' if r.is_active else '▶ Вкл' }}
+                                {{ '⏸ Disable' if r.is_active else '▶ Enable' }}
                             </button>
                         </form>
                         <form action="/autorules/delete/{{ r.id }}" method="POST"
-                              onsubmit="return confirm('Удалить правило?')">
-                            <button type="submit" class="btn btn-red btn-sm">Удалить</button>
+                              onsubmit="return confirm('Delete this rule?')">
+                            <button type="submit" class="btn btn-red btn-sm">Delete</button>
                         </form>
                     </div>
                 </td>
@@ -55,9 +55,9 @@
             <tr>
                 <td colspan="6" style="text-align:center; padding:60px; color:var(--dim);">
                     <div style="font-size:32px; margin-bottom:10px;">🚫</div>
-                    <div style="font-size:14px; font-weight:600; color:var(--muted);">Правил пока нет</div>
+                    <div style="font-size:14px; font-weight:600; color:var(--muted);">No rules yet</div>
                     <div style="font-size:12px; margin-top:6px;">
-                        <button class="btn btn-primary btn-sm" onclick="toggleModal('modal-add')">+ Добавить первое</button>
+                        <button class="btn btn-primary btn-sm" onclick="toggleModal('modal-add')">+ Add first rule</button>
                     </div>
                 </td>
             </tr>
@@ -66,32 +66,40 @@
     </table>
 </div>
 
-<!-- ── MODAL: ДОБАВИТЬ ПРАВИЛО ── -->
+<!-- MODAL -->
 <div class="modal-overlay" id="modal-add">
     <div class="modal">
-        <div class="modal-title">+ Новое автоправило</div>
+        <div class="modal-title">+ New auto-reject rule</div>
         <form action="/autorules/add" method="POST">
             <div class="form-group">
-                <label class="form-label">Поле</label>
-                <select name="field" class="form-control" required>
-                    <option value="salary_expectation">ЗП ожидание</option>
-                    <option value="age">Возраст</option>
+                <label class="form-label">Field</label>
+                <select name="field" class="form-control" required onchange="updateConditions(this.value)">
+                    <option value="salary_amount">Salary</option>
+                    <option value="age">Age</option>
+                    <option value="languages">Languages</option>
+                    <option value="work_type">Work type</option>
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Условие</label>
-                <select name="condition" class="form-control" required>
-                    <option value="gt">больше чем</option>
-                    <option value="lt">меньше чем</option>
+                <label class="form-label">Condition</label>
+                <select name="condition" id="condition-select" class="form-control" required>
+                    <option value="gt">greater than</option>
+                    <option value="lt">less than</option>
+                    <option value="eq">equals</option>
+                    <option value="contains">contains</option>
                 </select>
             </div>
             <div class="form-group">
-                <label class="form-label">Значение</label>
-                <input type="number" name="value" class="form-control" placeholder="Например: 150000" required>
+                <label class="form-label">Value</label>
+                <input type="text" name="value" class="form-control"
+                       placeholder="e.g. 150000 or Full-time" required>
+                <div style="font-size:11px; color:var(--muted); margin-top:4px;">
+                    Salary/Age: use a number. Languages/Work type: use text (contains match).
+                </div>
             </div>
             <div class="flex gap-8">
-                <button type="submit" class="btn btn-primary" style="flex:1;">✓ Создать правило</button>
-                <button type="button" class="btn btn-ghost" onclick="toggleModal('modal-add')">Отмена</button>
+                <button type="submit" class="btn btn-primary" style="flex:1;">✓ Create rule</button>
+                <button type="button" class="btn btn-ghost" onclick="toggleModal('modal-add')">Cancel</button>
             </div>
         </form>
     </div>
@@ -101,6 +109,22 @@
 function toggleModal(id) { document.getElementById(id).classList.toggle('open'); }
 document.querySelectorAll('.modal-overlay').forEach(m => m.addEventListener('click', e => { if(e.target===m) m.classList.remove('open'); }));
 document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-overlay.open').forEach(m => m.classList.remove('open')); });
+
+// Show relevant conditions based on field type
+function updateConditions(field) {
+    const sel = document.getElementById('condition-select');
+    const numeric = ['salary_amount', 'age'];
+    if (numeric.includes(field)) {
+        sel.innerHTML = `
+            <option value="gt">greater than</option>
+            <option value="lt">less than</option>
+            <option value="eq">equals</option>`;
+    } else {
+        sel.innerHTML = `
+            <option value="eq">equals</option>
+            <option value="contains">contains</option>`;
+    }
+}
 </script>
 
 {% endblock %}

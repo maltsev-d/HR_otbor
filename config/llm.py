@@ -15,7 +15,7 @@ LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
 def get_llm_client() -> tuple[AsyncOpenAI, str]:
     if LLM_PROVIDER == "ollama":
         client = AsyncOpenAI(
-            base_url="http://localhost:11434/v1",
+            base_url="http://localhost:11434",
             api_key="ollama",
         )
     elif LLM_PROVIDER == "groq":
