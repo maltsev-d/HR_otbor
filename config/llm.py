@@ -1,5 +1,9 @@
 import os
+
+from dotenv import load_dotenv
 from openai import AsyncOpenAI
+
+load_dotenv()
 
 # =====================================================================
 # Переключение провайдера — менять ТОЛЬКО здесь
@@ -9,7 +13,7 @@ from openai import AsyncOpenAI
 # =====================================================================
 
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "groq")
-LLM_MODEL = os.getenv("LLM_MODEL", "llama-3.3-70b-versatile")
+LLM_MODEL = os.getenv("LLM_MODEL", "openai/gpt-oss-120b")
 
 
 def get_llm_client() -> tuple[AsyncOpenAI, str]:

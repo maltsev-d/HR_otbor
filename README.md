@@ -1,4 +1,4 @@
-# HR_otbor — Telegram HR Screening Bot
+# AI Recruitment Assistant
 
 Telegram bot for automated candidate screening with a web admin panel. Portfolio project targeting Southeast Asian markets (Laos, Thailand) with 4-language support.
 

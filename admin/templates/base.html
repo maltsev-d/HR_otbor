@@ -8,11 +8,26 @@
     <style>
         *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
         :root {
-            --bg: #EEF0FA; --surface: #FFFFFF; --surface2: #F5F6FD; --surface3: #ECEEF8;
-            --border: #E2E5F0; --text: #1A1C3A; --text-2: #3D4066; --muted: #7880A8;
-            --dim: #B4BACD; --indigo: #4338CA; --purple: #7C3AED; --sky: #0EA5E9;
-            --teal: #14B8A6; --green: #10B981; --amber: #F59E0B; --rose: #F43F5E;
-            --pink: #EC4899; --sidebar-w: 240px; --topbar-h: 56px; --radius: 12px;
+            --bg: #EEF0FA;
+            --surface: #FFFFFF;
+            --surface2: #F5F6FD;
+            --surface3: #ECEEF8;
+            --border: #E2E5F0;
+            --text: #1A1C3A;
+            --text-2: #3D4066;
+            --muted: #7880A8;
+            --dim: #B4BACD;
+            --indigo: #4338CA;
+            --purple: #7C3AED;
+            --sky: #0EA5E9;
+            --teal: #14B8A6;
+            --green: #10B981;
+            --amber: #F59E0B;
+            --rose: #F43F5E;
+            --pink: #EC4899;
+            --sidebar-w: 240px;
+            --topbar-h: 56px;
+            --radius: 12px;
             --radius-sm: 8px; --shadow: 0 1px 4px rgba(26,28,58,0.06), 0 4px 16px rgba(26,28,58,0.05);
             --shadow-sm: 0 1px 3px rgba(26,28,58,0.08); --shadow-lift: 0 8px 24px rgba(67,56,202,0.18);
         }
@@ -21,7 +36,21 @@
         ::-webkit-scrollbar-track { background: var(--surface3); }
         ::-webkit-scrollbar-thumb { background: var(--indigo); border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: var(--purple); }
-        .sidebar { width: var(--sidebar-w); background: linear-gradient(175deg, #4338CA 0%, #6D28D9 100%); position: fixed; top: 0; left: 0; bottom: 0; display: flex; flex-direction: column; z-index: 100; overflow: hidden; }
+
+        .sidebar {
+            width: var(--sidebar-w);
+            background: linear-gradient(175deg,
+            #4338CA 0%,
+            #6D28D9 100%);
+            position: fixed;
+            top: 0;
+            left: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            z-index: 100;
+            overflow: hidden;
+        }
         .sidebar-logo { padding: 22px 20px 18px; display: flex; align-items: center; gap: 10px; border-bottom: 1px solid rgba(255,255,255,0.1); }
         .logo-gem { width: 34px; height: 34px; background: rgba(255,255,255,0.2); border-radius: 10px; border: 1px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
         .logo-text { font-size: 15px; font-weight: 800; color: #fff; letter-spacing: -0.3px; line-height: 1.1; }
@@ -241,7 +270,7 @@
       {% if messages %}
         <script>
           document.addEventListener('DOMContentLoaded', () => {
-            const flashed = {{ messages|tojson }};
+            const flashed = {{ messages|tojson }}
             flashed.forEach(([category, text]) => showToast(text, category));
           });
         </script>
