@@ -1,6 +1,7 @@
 import io
 import logging
 import os
+import tempfile
 
 import pdfplumber
 
@@ -18,30 +19,35 @@ RESPONSE_LANG = {
 }.get(BOT_LANG, "English")
 
 SUMMARY_PROMPT = """\
-You are an experienced HR specialist making a first assessment of a job candidate.
+You are an HR assistant preparing a concise, evidence-based candidate summary for a recruiter.
 
-Vacancy: {vacancy}
+Vacancy:
+{vacancy}
 
 Candidate answers:
 {candidate_data}
 
 {resume_section}
 
-Write a short but informative candidate summary for the recruiter.
-Evaluate: salary expectations vs market, age, location, languages, experience, work type preference.
+Write a concise summary in {response_lang}.
 
-Format:
-- Overall impression (1-2 sentences)
-- 1-2 strengths
-- 1 potential risk or uncertainty (if none: "No red flags at this stage")
-- 1-2 questions to ask before the interview
+Include:
+- Overall fit for the vacancy, based only on available evidence.
+- 1-2 relevant strengths supported by the candidate's answers or resume.
+- One material risk, mismatch, or missing piece of information. If none can be established, state that there is insufficient information to identify one.
+- 1-2 specific questions worth asking at the interview.
 
 Rules:
-- No headers
-- 3-5 sentences total
-- No filler words or corporate speak
-- Do not invent work experience not mentioned in the answers
-- Respond in {response_lang}
+- Write 3-5 sentences in total.
+- Do not use headings, bullet points, greetings, or introductory phrases.
+- Do not invent facts, qualifications, employment history, salary benchmarks, or language proficiency.
+- Clearly distinguish confirmed facts from assumptions.
+- Assess salary expectations against the vacancy's stated salary range only if both are available. Otherwise, state that the comparison cannot be made.
+- Mention age or location only when directly relevant to an explicit job requirement or work arrangement.
+- If information is missing, say so briefly instead of guessing.
+- Avoid generic praise, corporate jargon, and repetitive wording.
+- Use the resume and candidate answers together. If they conflict, mention the discrepancy rather than choosing one version.
+- Return only the summary, with no explanations about these instructions.
 """
 
 RESUME_SECTION_TEMPLATE = """\
@@ -55,7 +61,7 @@ def extract_text_from_pdf(file_bytes: bytes) -> str | None:
     try:
         with pdfplumber.open(io.BytesIO(file_bytes)) as pdf:
             pages = [page.extract_text() or "" for page in pdf.pages]
-            text  = "\n".join(pages).strip()
+            text = "\n".join(pages).strip()
             return text if text else None
     except Exception as e:
         logger.warning(f"PDF extract failed: {e}")
@@ -63,14 +69,36 @@ def extract_text_from_pdf(file_bytes: bytes) -> str | None:
 
 
 def extract_text_from_docx(file_bytes: bytes) -> str | None:
-    """Извлекает текст из DOCX через python-docx."""
+    """
+    Извлекает текст из DOCX/DOC.
+    Сначала пробует python-docx (для .docx),
+    затем docx2txt (справляется и со старым .doc).
+    """
+    # Попытка 1: python-docx
     try:
         import docx
-        doc   = docx.Document(io.BytesIO(file_bytes))
-        text  = "\n".join(p.text for p in doc.paragraphs).strip()
-        return text if text else None
+        doc = docx.Document(io.BytesIO(file_bytes))
+        text = "\n".join(p.text for p in doc.paragraphs).strip()
+        if text:
+            return text
     except Exception as e:
-        logger.warning(f"DOCX extract failed: {e}")
+        logger.debug(f"python-docx failed: {e}")
+
+    # Попытка 2: docx2txt (работает и с бинарным .doc)
+    try:
+        import docx2txt
+        tmp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(suffix=".doc", delete=False) as tmp:
+                tmp.write(file_bytes)
+                tmp_path = tmp.name
+            text = docx2txt.process(tmp_path).strip()
+            return text if text else None
+        finally:
+            if tmp_path and os.path.exists(tmp_path):
+                os.unlink(tmp_path)
+    except Exception as e:
+        logger.warning(f"DOCX extract failed (both methods): {e}")
         return None
 
 
@@ -80,12 +108,11 @@ async def download_telegram_file(bot, file_id: str) -> tuple[bytes, str] | None:
     Возвращает (bytes, filename) или None при ошибке.
     """
     try:
-        tg_file  = await bot.get_file(file_id)
+        tg_file = await bot.get_file(file_id)
         file_path = tg_file.file_path
-        filename  = file_path.split("/")[-1].lower()
+        filename = file_path.split("/")[-1].lower()
 
         file_bytes = await bot.download_file(file_path)
-        # download_file возвращает BytesIO
         if hasattr(file_bytes, "read"):
             file_bytes = file_bytes.read()
 
@@ -98,8 +125,7 @@ async def download_telegram_file(bot, file_id: str) -> tuple[bytes, str] | None:
 async def extract_resume_text(bot, file_id: str) -> str | None:
     """
     Скачивает файл резюме из Telegram и извлекает текст.
-    Поддерживает PDF и DOCX.
-    Возвращает текст или None если не удалось.
+    Поддерживает PDF, DOCX и старый DOC.
     """
     result = await download_telegram_file(bot, file_id)
     if not result:
@@ -152,14 +178,13 @@ async def generate_candidate_summary(
     if bot and resume_file_id:
         resume_text = await extract_resume_text(bot, resume_file_id)
         if resume_text:
-            # Обрезаем чтобы не перегрузить контекст — 3000 символов достаточно
             truncated = resume_text[:3000]
             if len(resume_text) > 3000:
                 truncated += "\n[... truncated ...]"
             resume_section = RESUME_SECTION_TEMPLATE.format(resume_text=truncated)
             logger.info(f"Resume text extracted: {len(resume_text)} chars")
         else:
-            logger.info("Resume file found but text extraction failed (possibly image-based PDF)")
+            logger.info("Resume file found but text extraction failed (possibly image-based PDF or unsupported format)")
 
     prompt = SUMMARY_PROMPT.format(
         vacancy=vacancy_title or "not specified",
@@ -168,14 +193,39 @@ async def generate_candidate_summary(
         response_lang=RESPONSE_LANG,
     )
 
+
     try:
         response = await client.chat.completions.create(
             model=model,
             messages=[{"role": "user", "content": prompt}],
-            max_tokens=300,
+            max_tokens=4000,
             temperature=0.3,
         )
-        return response.choices[0].message.content.strip()
-    except Exception as e:
-        logger.error(f"LLM summary error: {e}")
+
+        if not response.choices:
+            logger.error(
+                "LLM returned no choices. Model=%s, response=%r",
+                model, response,
+            )
+            return None
+
+        choice = response.choices[0]
+        raw = choice.message.content
+
+        logger.info(
+            "LLM response: model=%s, finish_reason=%s, content=%r",
+            model, choice.finish_reason, raw,
+        )
+
+        if not raw or not raw.strip():
+            logger.error(
+                "LLM returned empty summary. Model=%s, finish_reason=%s",
+                model, choice.finish_reason,
+            )
+            return None
+
+        return raw.strip()
+
+    except Exception:
+        logger.exception("LLM summary generation failed. Model=%s", model)
         return None

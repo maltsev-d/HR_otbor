@@ -1,22 +1,23 @@
-import re
 import logging
+import re
 
-from aiogram import Router, F
-from aiogram.types import Message, CallbackQuery, InlineKeyboardMarkup, InlineKeyboardButton
-from aiogram.fsm.context import FSMContext
-from aiogram.filters import CommandStart
+from aiogram import F, Router
 from aiogram.exceptions import TelegramNetworkError
+from aiogram.filters import CommandStart
+from aiogram.fsm.context import FSMContext
+from aiogram.types import CallbackQuery, InlineKeyboardButton, InlineKeyboardMarkup, Message
 
-from bot.states.application import ApplicationForm
-from bot.services.llm_service import generate_candidate_summary
-from bot.services.autoreject import check_autoreject
 from bot.rag.index import search_vacancies
+from bot.services.autoreject import check_autoreject
+from bot.services.llm_service import generate_candidate_summary
+from bot.states.application import ApplicationForm
 from config.questions import q
 from config.settings import ADMIN_IDS, DEFAULT_CURRENCY
-from db.models import Candidate, Vacancy, VacancyTranslation, Application
+from db.models import Application, Candidate, Vacancy, VacancyTranslation
 from db.session import SessionLocal
 
 router = Router()
+logger = logging.getLogger(__name__)
 
 
 # ─── HELPERS ──────────────────────────────────────────────────────────────────
@@ -408,12 +409,18 @@ async def handle_work_type(message: Message, state: FSMContext):
         bot=message.bot,
         resume_file_id=resume_file_id,
     )
+    print(f"Generated summary: {ai_summary!r}")
+    logger.info(f"Generated summary: {ai_summary!r}")
+
     if ai_summary:
         with SessionLocal() as session:
             candidate = session.query(Candidate).filter_by(tg_id=message.from_user.id).first()
             if candidate:
                 candidate.ai_summary = ai_summary
                 session.commit()
+                logger.info(f"AI summary saved for candidate {candidate.id}")
+            else:
+                logger.warning(f"Candidate not found by tg_id={message.from_user.id} — summary not saved")
 
     # Уведомление HR
     currency = data.get("salary_currency", DEFAULT_CURRENCY)
